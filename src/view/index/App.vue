@@ -1,0 +1,154 @@
+<template>
+  <div>
+      <audio id="localAudio" autoplay controls></audio>
+  </div>
+  <div class="comments" v-if="comments === true">
+    <label>发条弹幕</label>
+    <input type="text" v-model="message" id="subscript"/>
+    <button @click="subscript">提交</button>
+  </div>
+  <div id="content" v-html="html">
+  </div>
+</template>
+
+<script setup>
+  import { ref, watchEffect } from "vue";
+
+  const IP = '2408:820c:8f7c:4dd0:b77b:95a1:9727:b9f5';
+  const content = ref(null);
+  const html = ref(null);
+  const comments = ref(true);
+  const message = ref(null);
+  let ws = null;
+  let peerConnection = null;
+  let outStream = null;
+  let clientId = null;
+
+  watchEffect(async () => {
+    if (content.value === null)
+      return;
+    const response = await fetch(
+      `http://[${IP}]/content/${content.value}`
+    )
+    html.value = await response.text();
+  })
+  function startWebSocket()
+  {
+    if ("WebSocket" in window)
+    {
+        
+        // 打开一个 web socket
+        ws = new WebSocket(`ws://[${window.ip}]:${window.port}`);
+        
+        ws.onopen = function()
+        {
+          // Web Socket 已连接上，使用 send() 方法发送数据
+          ws.send(JSON.stringify({ type: 'client', media: 'audio'}));
+        };
+        
+        ws.onmessage = function (evt) 
+        { 
+          var msg = evt.data;
+          const obj = JSON.parse(msg);
+          switch (obj.type) {
+            case 'content':
+              content.value = obj.content;
+              comments.value = obj.comments;
+              break;
+            case 'ready':
+                onReady(obj);
+                break;
+            case 'offer':
+                onOffer(obj);
+                break;
+            case 'hostCandidate':
+                onHostCandidate(obj);
+                break;
+            default:
+                break;
+          }
+        };
+        
+        ws.onclose = function()
+        { 
+          // 关闭 websocket
+        };
+    }
+    else
+    {
+        // 浏览器不支持 WebSocket
+        alert("您的浏览器不支持 WebSocket!");
+    }
+  }
+  window.onload = startWebSocket;
+  function onReady(obj) {
+    clientId = obj.id;
+    // const configuration = { iceServers: [{ urls: 'stun:stun.xten.com:3478' }] };
+    // const configuration = { iceServers: [{ url: 'stun:[2408:820c:8f7f:3c00:c988:1b1e:1198:80e9]:3478' }] };
+    const configuration = {"iceServers":[{
+        "urls":[`turn:[${window.ip}]:3478`],
+        "username":"senseberg",
+        "credential":"great"}]};
+    peerConnection = new RTCPeerConnection(configuration);
+    peerConnection.onicecandidate = (e) => {
+        if (e.candidate) {
+          //alert('client candidate');
+          ws.send(JSON.stringify({ type: 'clientCandidate', candidate: e.candidate, id:clientId}));
+          //alert(e.candidate.candidate);
+        }
+    };
+    peerConnection.ontrack = (ev) => {
+        if (ev.streams && ev.streams[0]) {
+          document.getElementById('localAudio').srcObject = ev.streams[0];
+          // alert('stream received');
+        } else {
+          if (!outStream) {
+          outStream = new MediaStream();
+          document.getElementById('localAudio').srcObject = outStream;
+          }
+          outStream.addTrack(ev.track);
+          // alert('track received');
+        }
+    };
+    peerConnection.addEventListener('connectionstatechange', () => {
+        if (peerConnection.connectionState === 'connected') {
+          //alert('connected');
+        }
+    });
+  }
+
+  async function onOffer(obj) {
+    const offer = new RTCSessionDescription(obj.offer);
+    await peerConnection.setRemoteDescription(offer);
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    const json = JSON.stringify({ type: 'answer', 'answer': answer, id: clientId });
+    ws.send(json);
+  }
+
+  function onHostCandidate(obj) {
+    peerConnection.addIceCandidate(obj.candidate);
+    //alert('host candidate received');
+  }
+
+  function subscript() {
+    if (message.value !== null) {
+      ws.send(JSON.stringify({ type: 'subscript', message: message.value }))
+      message.value = null;
+    }
+  }
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 10px;
+}
+#subscript {
+  margin: 0 1em;
+}
+</style>
