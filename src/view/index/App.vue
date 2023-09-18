@@ -1,42 +1,60 @@
 <template>
-  <div>
-      <audio id="localAudio" autoplay controls></audio>
+  <div id ="comments" class="item" v-if="comments">
+    <label class="sub-item left" >发条弹幕：</label>
+    <input type="text" v-model="message" id="subscript" class="sub-item left full"/>
+    <button @click="subscript" class="sub-item left">提交</button>
   </div>
-  <div class="comments" v-if="comments === true">
-    <label>发条弹幕</label>
-    <input type="text" v-model="message" id="subscript"/>
-    <button @click="subscript">提交</button>
-  </div>
-  <div id="content" v-html="html">
+  <div id="content" class="item" v-html="html">
   </div>
 </template>
 
 <script setup>
   import { ref, watchEffect } from "vue";
 
-  const IP = '2408:820c:8f7c:4dd0:b77b:95a1:9727:b9f5';
+  const SERVER_IP = '2408:820c:8f7d:c570:20c:29ff:fe94:ca49';
   const content = ref(null);
   const html = ref(null);
   const comments = ref(true);
   const message = ref(null);
+  let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
   let peerConnection = null;
   let outStream = null;
   let clientId = null;
+  let previousContent = null;
 
   watchEffect(async () => {
     if (content.value === null)
       return;
     const response = await fetch(
-      `http://[${IP}]/content/${content.value}`
-    )
+      `http://[${SERVER_IP}]/html/${content.value}`
+    );
     html.value = await response.text();
   })
+
+  async function displayPage(path) {
+    updateContent = false;
+    const response = await fetch(
+      `http://[${SERVER_IP}]/html/${path}`
+    );
+    html.value = await response.text();
+  }
+
+  window.displayPage = displayPage;
+
+  async function restoreContent() {
+    updateContent = true;
+    const response = await fetch(
+      `http://[${SERVER_IP}]/html/${previousContent}`
+    );
+    html.value = await response.text();
+  }
+  window.restoreContent = restoreContent;
+
   function startWebSocket()
   {
     if ("WebSocket" in window)
     {
-        
         // 打开一个 web socket
         ws = new WebSocket(`ws://[${window.ip}]:${window.port}`);
         
@@ -52,8 +70,12 @@
           const obj = JSON.parse(msg);
           switch (obj.type) {
             case 'content':
-              content.value = obj.content;
-              comments.value = obj.comments;
+                previousContent = obj.content;
+                //alert(previousContent + "\n" + updateContent.value);
+                comments.value = obj.comments;
+              if (updateContent) {  // when client is getting detail about the content, stop updatting content
+                content.value = obj.content;
+              }
               break;
             case 'ready':
                 onReady(obj);
@@ -137,10 +159,18 @@
       message.value = null;
     }
   }
+
 </script>
 
 <style>
+#body {
+  width: 100 vw;
+}
+#localAudio {
+  width: 100%;
+}
 #app {
+  width: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -148,7 +178,27 @@
   color: #2c3e50;
   margin-top: 10px;
 }
-#subscript {
-  margin: 0 1em;
+#comments {
+  align-items: baseline;
+}
+.item {
+  width: 100%;
+  margin: 0.5em 0;
+}
+.sub-item {
+  margin: 0 2px;
+}
+.item-button {
+  align-self: center;
+  margin: 0.5em 0;
+}
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+.full {
+  width: auto;
 }
 </style>

@@ -1,6 +1,9 @@
 <template>
   <h1>正在共享媒体</h1>
   <div>
+    <button @click="resetContent">重置展示内容</button>
+  </div>
+  <div>
     <h2>弹幕申请</h2>
     <input type="radio" id="zero" value=0 v-model="dealSubscript"/>
     <label for="zero">手动处理</label>
@@ -34,7 +37,7 @@
     "urls":[`turn:[${window.ip}]:3478`],
     "username":"senseberg",
     "credential":"great"}]};
-  const defaultContent = "default"; // the url of default content
+  const defaultContent = "default_001"; // the path of default content
   const defaultComments = true;
 
   function startWebSocket()
@@ -167,6 +170,10 @@
     if (flag) {
       ws.send(JSON.stringify({ type: 'displaySubscript', message: message }))
     }
+  }
+
+  function resetContent() {
+    ws.send(JSON.stringify({ type: 'content', content: 'default' })) //reset default content
   }
 </script>
 
