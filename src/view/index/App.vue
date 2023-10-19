@@ -1,8 +1,17 @@
 <template>
   <div id ="comments" class="item" v-if="comments">
-    <label class="sub-item left" >发条弹幕：</label>
+    <select class="sub-item left" v-model="type" >
+      <option disabled value="default">选择特效：</option>
+      <option value="bullet">弹幕</option>
+      <option value="plain">平面文字</option>
+      <option value="neon-blue">氙光蓝</option>
+      <option value="neon-blue-animation">氙光蓝-动画</option>
+      <option value="fire">火焰</option>
+      <option value="stroke">轮廓</option>
+      <option value="blur">模糊</option>
+    </select>
     <input type="text" v-model="message" id="subscript" class="sub-item left full"/>
-    <button @click="subscript" class="sub-item left">提交</button>
+    <button @click="subscript" class="sub-item left">发送字幕</button>
   </div>
   <div id="content" class="item" v-html="html">
   </div>
@@ -16,6 +25,7 @@
   const html = ref(null);
   const comments = ref(true);
   const message = ref(null);
+  const type = ref('default');
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
   let peerConnection = null;
@@ -155,7 +165,7 @@
 
   function subscript() {
     if (message.value !== null) {
-      ws.send(JSON.stringify({ type: 'subscript', message: message.value }))
+      ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
       message.value = null;
     }
   }

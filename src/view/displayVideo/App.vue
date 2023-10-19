@@ -31,7 +31,7 @@
           const obj = JSON.parse(msg);
           switch (obj.type) {
             case 'displaySubscript':
-              displaySubcript(obj.message);
+              displaySubcript(obj.message.content, obj.message.type);
               break;
             case 'ready':
                 onReady(obj);
@@ -109,20 +109,86 @@
     //alert('host candidate received');
   }
 
-  function displaySubcript(msg) {
-    const bullet = document.createElement("div");
-    bullet.className = "bullet";
-    bullet.innerText = msg;
-    bullet.style.willChange = "transform";
-    const container = document.getElementById("container");
-    container.appendChild(bullet);
-    setTimeout(() => {
-      bullet.style.transition = `transform ${((container.clientWidth + bullet.clientWidth) / container.clientWidth) * 10}s linear`;
-      bullet.style.transform = `translateX(-${container.clientWidth + bullet.clientWidth}px)`;
-      bullet.addEventListener('transitionend', () => {
-        container.removeChild(bullet);
-      });
-    }, 1000);
+  function displaySubcript(msg, type) {
+    switch (type) {
+      case 'fire':
+        {
+          const fullscreen = document.createElement('div');
+          fullscreen.className = type;
+          const background = document.createElement('div');
+          background.className = 'background';
+          const text = document.createElement('p');
+          text.className = 'text';
+          text.innerText = msg;
+          text.setAttribute('data-text', msg);
+          background.appendChild(text);
+          fullscreen.appendChild(background);
+          const container = document.getElementById("container");
+          container.appendChild(fullscreen);
+          setTimeout(() => {
+            container.removeChild(fullscreen);
+          }, 10000);
+          break;
+        }
+      case 'neon-blue-animation':
+        {
+          const fullscreen = document.createElement('div');
+          fullscreen.className = type;
+          const text = document.createElement('p');
+          text.className = 'text';
+          for (var i = 0; i < msg.length; i++){
+            const span = document.createElement('span');
+            span.style.animationDelay = `${1 + 0.2 * i}s`;
+            span.innerText = msg[i];
+            text.appendChild(span);
+          }
+          fullscreen.appendChild(text);
+          const container = document.getElementById("container");
+          container.appendChild(fullscreen);
+          setTimeout(() => {
+            container.removeChild(fullscreen);
+          }, 10000);
+          break;
+        }
+      case 'neon-blue':
+      case 'stroke':
+      case 'plain':
+      case 'blur':
+        {
+          const fullscreen = document.createElement('div');
+          fullscreen.className = type;
+          const text = document.createElement('p');
+          text.className = 'text';
+          text.innerText = msg;
+          text.setAttribute('data-text', msg);
+          fullscreen.appendChild(text);
+          const container = document.getElementById("container");
+          container.appendChild(fullscreen);
+          setTimeout(() => {
+            container.removeChild(fullscreen);
+          }, 10000);
+          break;
+        }
+      case 'bullet':
+      case 'default':
+      default:
+        {
+          const bullet = document.createElement("div");
+          bullet.className = 'bullet';
+          bullet.innerText = msg;
+          bullet.style.willChange = "transform";
+          const container = document.getElementById("container");
+          container.appendChild(bullet);
+          setTimeout(() => {
+            bullet.style.transition = `transform ${((container.clientWidth + bullet.clientWidth) / container.clientWidth) * 10}s linear`;
+            bullet.style.transform = `translateX(-${container.clientWidth + bullet.clientWidth}px)`;
+            bullet.addEventListener('transitionend', () => {
+              container.removeChild(bullet);
+            });
+          }, 2000);
+        }
+    }
+    
   }
 
   function fullscreen() {
@@ -151,6 +217,166 @@
   font-size: 5em;
   color: white;
   pointer-events: none;
+}
+
+.neon-blue,.neon-blue-animation,.fire,.stroke,.plain {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  background-color: black;
+}
+
+.fire {
+  background-color: #fff;
+}
+
+.blur {
+  box-sizing: border-box;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  filter: contrast(20);
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.fire .background{
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  background-image: url('assets/images/fire.jpg');
+  background-size: cover;
+  -webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.neon-blue .text,.neon-blue-animation .text,.fire .text,.stroke .text, .plain .text {
+  align-self: center;
+  font-size: 10em;
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+
+.plain .text{
+  color: #fff;
+}
+
+.neon-blue .text{
+  color: #fff;
+    text-shadow: 
+        0 0 10px #0ebeff,
+        0 0 20px #0ebeff,
+        0 0 50px #0ebeff,
+        0 0 100px #0ebeff,
+        0 0 200px #0ebeff;
+  animation: neon-blue 1.5s ease-in-out infinite alternate;
+}
+
+.stroke .text {
+  position: relative;
+  -webkit-text-stroke: 3px #7272a5;
+  &::before {
+        content: " ";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-image: linear-gradient(45deg, #ff269b, #2ab5f5, #ffbf00);
+        mix-blend-mode: multiply;
+    }
+
+    &::after {
+        content: "";
+        background: radial-gradient(circle, #fff, #000 50%);
+        background-size: 25% 25%;
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        right: 0;
+        bottom: 0;
+        mix-blend-mode: color-dodge;
+        animation: mix 5s linear infinite;
+    }
+}
+
+.blur .text {
+  box-sizing: border-box;
+  font-family: Righteous;
+  color: white;
+  font-size: 10rem;
+  text-transform: uppercase;
+  line-height: 1;
+  animation: letterspacing 5s linear forwards;
+  display: block;
+  letter-spacing: -5rem;
+  align-self: center;
+}
+
+.neon-blue-animation .text span{
+  animation: flicker 1s linear forwards;
+}
+
+@keyframes neon-blue {
+  from {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228dff,
+      0 0 70px #228dff, 0 0 80px #228dff, 0 0 100px #228dff, 0 0 150px #228dff;
+  }
+  to {
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #228dff,
+      0 0 35px #228dff, 0 0 40px #228dff, 0 0 50px #228dff, 0 0 75px #228dff;
+  }
+}
+
+@keyframes flicker {
+  0% {
+    color: transparent;
+  }
+  5%, 15%, 25%, 30%, 100% {
+    color: #fff;
+    text-shadow: 
+      0px 0px 5px #0ebeff,
+      0px 0px 10px #0ebeff,
+      0px 0px 20px #0ebeff,
+      0px 0px 50px #0ebeff;
+      
+  }
+  10%, 20% {
+    color: transparent;
+    text-shadow: none;
+  }
+}
+
+@keyframes mix {
+    to {
+        transform: translate(50%, 50%);
+    }
+}
+
+@keyframes letterspacing {
+    0% {
+        letter-spacing: -5rem;
+        filter: blur(.6rem);
+    }
+
+    50% {
+        filter: blur(.4rem);
+    }
+
+    100% {
+        letter-spacing: .5rem;
+        filter: blur(0rem);
+    }
 }
 
 </style>
