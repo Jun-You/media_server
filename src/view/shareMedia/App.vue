@@ -18,7 +18,8 @@
     处理第一条 <button @click="displaySubscript(true)">接受</button> <button @click="displaySubscript(false)">拒绝</button>
     </div>
     <div v-for="item in subscripts" v-bind:key="item">
-      <span>{{ item }}</span>
+      <span v-if="item.type !== 'image'">{{ item.content }}</span>
+      <span v-if="item.type === 'image'"><img :src="item.image" class="preview"></span>
     </div>
   </div>
   
@@ -185,5 +186,9 @@
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.preview {
+  max-height: 400px;
 }
 </style>

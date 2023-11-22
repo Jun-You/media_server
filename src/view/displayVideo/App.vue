@@ -31,7 +31,7 @@
           const obj = JSON.parse(msg);
           switch (obj.type) {
             case 'displaySubscript':
-              displaySubcript(obj.message.content, obj.message.type);
+              displaySubcript(obj.message);
               break;
             case 'ready':
                 onReady(obj);
@@ -109,18 +109,38 @@
     //alert('host candidate received');
   }
 
-  function displaySubcript(msg, type) {
-    switch (type) {
+  function displaySubcript(message) {
+    switch (message.type) {
+      case 'image':
+        {
+          const fullscreen = document.createElement('div');
+          fullscreen.className = message.type;
+          const image = document.createElement('img');
+          image.className = 'display';
+          image.src = message.image;
+          fullscreen.appendChild(image);
+          const text = document.createElement('p');
+          text.className = 'text';
+          text.innerText = message.content;
+          text.setAttribute('data-text', message.content);
+          fullscreen.appendChild(text);
+          const container = document.getElementById("container");
+          container.appendChild(fullscreen);
+          setTimeout(() => {
+            container.removeChild(fullscreen);
+          }, 10000);
+          break;
+        }
       case 'fire':
         {
           const fullscreen = document.createElement('div');
-          fullscreen.className = type;
+          fullscreen.className = message.type;
           const background = document.createElement('div');
           background.className = 'background';
           const text = document.createElement('p');
           text.className = 'text';
-          text.innerText = msg;
-          text.setAttribute('data-text', msg);
+          text.innerText = message.content;
+          text.setAttribute('data-text', message.content);
           background.appendChild(text);
           fullscreen.appendChild(background);
           const container = document.getElementById("container");
@@ -133,13 +153,13 @@
       case 'neon-blue-animation':
         {
           const fullscreen = document.createElement('div');
-          fullscreen.className = type;
+          fullscreen.className = message.type;
           const text = document.createElement('p');
           text.className = 'text';
-          for (var i = 0; i < msg.length; i++){
+          for (var i = 0; i < message.content.length; i++){
             const span = document.createElement('span');
             span.style.animationDelay = `${1 + 0.2 * i}s`;
-            span.innerText = msg[i];
+            span.innerText = message.content[i];
             text.appendChild(span);
           }
           fullscreen.appendChild(text);
@@ -156,11 +176,11 @@
       case 'blur':
         {
           const fullscreen = document.createElement('div');
-          fullscreen.className = type;
+          fullscreen.className = message.type;
           const text = document.createElement('p');
           text.className = 'text';
-          text.innerText = msg;
-          text.setAttribute('data-text', msg);
+          text.innerText = message.content;
+          text.setAttribute('data-text', message.content);
           fullscreen.appendChild(text);
           const container = document.getElementById("container");
           container.appendChild(fullscreen);
@@ -175,7 +195,7 @@
         {
           const bullet = document.createElement("div");
           bullet.className = 'bullet';
-          bullet.innerText = msg;
+          bullet.innerText = message.content;
           bullet.style.willChange = "transform";
           const container = document.getElementById("container");
           container.appendChild(bullet);
@@ -219,7 +239,7 @@
   pointer-events: none;
 }
 
-.neon-blue,.neon-blue-animation,.fire,.stroke,.plain {
+.neon-blue,.neon-blue-animation,.fire,.stroke,.plain,.image {
   position: relative;
   height: 100%;
   width: 100%;
@@ -259,12 +279,26 @@
 	background-clip: text;
 }
 
-.neon-blue .text,.neon-blue-animation .text,.fire .text,.stroke .text, .plain .text {
+.neon-blue .text,.neon-blue-animation .text,.fire .text,.stroke .text, .plain .text, .image .text{
   align-self: center;
   font-size: 10em;
   pointer-events: none;
   max-width: 90%;
+  max-height: 100%;
   text-align: center;
+}
+
+.image .display {
+  position: absolute;
+  align-self: center;
+  pointer-events: none;
+  height: 100%;
+}
+
+.image .text {
+  position: absolute;
+  color: white;
+  top: 50%;
 }
 
 .plain .text{

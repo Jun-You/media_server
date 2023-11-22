@@ -5,7 +5,7 @@ module.exports = defineConfig({
     index: {
       entry: "./src/view/index/main.js",
       template: "./src/view/index/index.html",
-      title: "实时音频"
+      title: "超媒体"
     },
     playLocalVideos: {
       entry: "./src/view/playLocalVideos/main.js",

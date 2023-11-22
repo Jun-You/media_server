@@ -9,9 +9,11 @@
       <option value="fire">火焰</option>
       <option value="stroke">轮廓</option>
       <option value="blur">模糊</option>
+      <option value="image">图片</option>
     </select>
     <input type="text" v-model="message" id="subscript" class="sub-item left full"/>
-    <button @click="subscript" class="sub-item left">发送字幕</button>
+    <input type="file" v-if="type === 'image'" id="choose-image" accept="image/*" class="sub-item left full" :on-change="checkImageCount"/>
+    <button @click="subscript" class="sub-item right">{{ type === 'image'?'发送图片':'发送文字' }}</button>
   </div>
   <div id="content" class="item" v-html="html">
   </div>
@@ -20,12 +22,13 @@
 <script setup>
   import { ref, watchEffect } from "vue";
 
-  const SERVER_IP = '2408:820c:8f7d:c570:20c:29ff:fe94:ca49';
+  const SERVER_IP = '2408:820c:8f78:d3b0:20c:29ff:fe94:ca49';
   const content = ref(null);
   const html = ref(null);
   const comments = ref(true);
   const message = ref(null);
   const type = ref('default');
+  let image = '';
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
   let peerConnection = null;
@@ -164,9 +167,37 @@
   }
 
   function subscript() {
-    if (message.value !== null) {
-      ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
-      message.value = null;
+    if (type.value !== 'image') {
+      if (message.value !== null) {
+        ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
+        message.value = null;
+      }
+    } else {
+      var file = document.getElementById('choose-image');
+      image = '';
+      if (!file.files || !file.files[0]) {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = (evt) => {
+        image = evt.target.result;
+        if (image !== null && image !== '') {
+          ws.send(JSON.stringify({ type: 'subscript', message: {image: image, content: message.value, type: type.value}}))
+        }
+      }
+
+      reader.readAsDataURL(file.files[0]);
+    }
+    
+  }
+
+  function checkImageCount() {
+    const files = document.getElementById('choose-image');
+    const filesCount = files.files.length;
+    if (filesCount >= 1) {
+      files.disabled = true;
+    } else {
+      files.disabled = false;
     }
   }
 
@@ -210,5 +241,9 @@
 }
 .full {
   width: auto;
+  max-width: 50%;
+}
+#choose-image {
+  max-width: 75%;
 }
 </style>
