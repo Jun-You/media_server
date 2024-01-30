@@ -1,5 +1,5 @@
 <template>
-  <div id ="comments" class="item" v-if="comments">
+  <!-- <div id ="comments" class="item" v-if="comments">
     <select class="sub-item left" v-model="type" >
       <option disabled value="default">选择特效：</option>
       <option value="bullet">弹幕</option>
@@ -14,16 +14,26 @@
     <input type="text" v-model="message" id="subscript" class="sub-item left full"/>
     <input type="file" v-if="type === 'image'" id="choose-image" accept="image/*" class="sub-item left full" :on-change="checkImageCount"/>
     <button @click="subscript" class="sub-item right">{{ type === 'image'?'发送图片':'发送文字' }}</button>
-  </div>
+  </div> -->
   <div id="content" class="item" v-html="html">
   </div>
+  <div v-if="comments" @click="isXpPopup=true" class="sendButton">
+<img src="./send.png" alt="发送" style="width: 30px;height: auto;">
+  </div>
+  <div style="position: fixed;bottom: 0;left: 0;z-index: 99999999;">
+  <xpPopup @close="isXpPopup=false" v-if="isXpPopup" @change="sendMsg" />
+  </div>
+
 </template>
 
 <script setup>
+  // window.ip='2408:8421:1957:212e:fad1:52b8:23a0:755b'
+  // window.port=41647
   import { ref, watchEffect } from "vue";
-
-  const SERVER_IP = '2408:820c:8f78:d3b0:20c:29ff:fe94:ca49';
+  import xpPopup from "./components/xp-popup/xp-popup.vue"
+  const SERVER_IP = '2408:820c:8f7f:28c0:20c:29ff:fe94:ca49';
   const content = ref(null);
+  var isXpPopup=ref(false)
   const html = ref(null);
   const comments = ref(true);
   const message = ref(null);
@@ -46,6 +56,7 @@
   })
 
   async function displayPage(path) {
+
     updateContent = false;
     const response = await fetch(
       `http://[${SERVER_IP}]/html/${path}`
@@ -70,9 +81,10 @@
     {
         // 打开一个 web socket
         ws = new WebSocket(`ws://[${window.ip}]:${window.port}`);
-        
+      console.log("准备连接web socket")
         ws.onopen = function()
         {
+      console.log("连接成功 socket")
           // Web Socket 已连接上，使用 send() 方法发送数据
           ws.send(JSON.stringify({ type: 'client', media: 'audio'}));
         };
@@ -165,39 +177,18 @@
     peerConnection.addIceCandidate(obj.candidate);
     //alert('host candidate received');
   }
+  
+  function sendMsg(msg) {
+    console.log(msg.value,msg.modelId)
+    if (msg.value !== null) {
+      ws.send(JSON.stringify({ type: 'subscript', message: {content: msg.value, type:msg.modelId}}))
 
-  function subscript() {
-    if (type.value !== 'image') {
-      if (message.value !== null) {
-        ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
-        message.value = null;
-      }
-    } else {
-      var file = document.getElementById('choose-image');
-      image = '';
-      if (!file.files || !file.files[0]) {
-        return;
-      }
-      var reader = new FileReader();
-      reader.onload = (evt) => {
-        image = evt.target.result;
-        if (image !== null && image !== '') {
-          ws.send(JSON.stringify({ type: 'subscript', message: {image: image, content: message.value, type: type.value}}))
-        }
-      }
-
-      reader.readAsDataURL(file.files[0]);
     }
-    
   }
-
-  function checkImageCount() {
-    const files = document.getElementById('choose-image');
-    const filesCount = files.files.length;
-    if (filesCount >= 1) {
-      files.disabled = true;
-    } else {
-      files.disabled = false;
+  function subscript() {
+    if (message.value !== null) {
+      ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
+      message.value = null;
     }
   }
 
@@ -209,6 +200,20 @@
 }
 #localAudio {
   width: 100%;
+}
+.sendButton{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #187FED;
+  box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.3);
+  display: flex;
+  z-index: 3;
+  align-items: center;
+  justify-content: center;
 }
 #app {
   width: 100%;

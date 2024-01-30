@@ -1,21 +1,108 @@
 <template >
   <div id="container">
     <video id ="localVideo" autoplay controls></video>
+    <animation1 :playTime="playTime" ref="animation1Ref" />
+  <animation2 :playTime="playTime" ref="animation2Ref" />
+  <animation3 :playTime="playTime" ref="animation3Ref" />
+  <animation4 :playTime="playTime" ref="animation4Ref" />
+  <animation5 :playTime="playTime" ref="animation5Ref"  />
+  <animation6 :playTime="playTime" ref="animation6Ref"  />
+  <meteorpassing :playTime="playTime" ref="meteorpassingRef" />
+  <newline :playTime="playTime" ref="newlineRef"/>
   </div>
+
   <button @click="fullscreen">全屏</button>
+  
 </template>
 
-<script setup>
+<script setup> 
+//window.port=55180
+  import { ref ,onMounted} from "vue";
+
+  import animation1 from "./components/xp-animation1/xp-animation1"
+  import animation2 from "./components/xp-animation2/xp-animation2.vue"
+  import animation3 from "./components/xp-animation3/xp-animation3.vue"
+  import animation4 from "./components/xp-animation4/xp-animation4.vue"
+  import animation5 from "./components/xp-animation5/xp-animation5.vue"
+  import animation6 from "./components/xp-animation6/xp-animation6.vue"
+  import meteorpassing from "./components/xp-meteorPassing/xp-meteorpassing.vue"
+  import newline from "./components/xp-newline/xp-newline.vue"
+
+  let xpAnimationObj={}
   let ws = null;
   let peerConnection = null;
   let outStream = null;
   let clientId = null;
+  let playTime=1000*30 //单位毫秒
+  const animation1Ref=ref(null);//动画1
+  xpAnimationObj.draw1=(text) => {
+    return animation1Ref.value.draw1(text)
+  }
+  const animation2Ref=ref(null);//动画1
+  xpAnimationObj.draw2=(text) => {
+    return animation2Ref.value.draw1(text)
+  }
+  const animation3Ref=ref(null);
+  xpAnimationObj.draw3=(text) => {
+    return animation3Ref.value.draw1(text)
+  }
+  const animation4Ref=ref(null);
+  xpAnimationObj.draw4=(text) => {
+    return animation4Ref.value.draw1(text)
+  }
+  const animation5Ref=ref(null);
+  xpAnimationObj.draw5=(text) => {
+    return animation5Ref.value.draw1(text)
+  }
+  const animation6Ref=ref(null);
+  xpAnimationObj.draw6=(text) => {
+    return animation6Ref.value.draw1(text)
+  }
+  
+  const meteorpassingRef=ref(null);
+  xpAnimationObj.draw7=(text) => {
+    return meteorpassingRef.value.drawCanvas(text)
+  }
+  const newlineRef=ref(null);
+  xpAnimationObj.draw8=(text) => {
+    return newlineRef.value.drawCanvas(text)
+  }
+  let translates = [];
+  let playtype=false
+  onMounted(()=>{
+      // xpAnimationObj.draw8('执行传输的内容')
 
+    // draw2("展示效果2")
+    // draw3('asdads')
+  })
+ async function playAnimation(){
+   let translate = translates.splice(0,1)
+   if(translate[0].message.type.slice(0,3)=='xp-'){
+    await xpAnimationObj[translate[0].message.type.slice(3)](translate[0].message.content).then(e=>{
+      if(translates.length!=0){
+        playAnimation()
+      }else{
+        playtype=false
+      }
+    })
+   }else{
+    displaySubcript(translate[0].message).then(e=>{
+      if(translates.length!=0){
+        playAnimation()
+      }else{
+        playtype=false
+      }
+    })
+   }
+   
+
+    
+
+  }
   function startWebSocket()
   {
     if ("WebSocket" in window)
     {
-        
         // 打开一个 web socket
         ws = new WebSocket(`ws://localhost:${window.port}`);
         
@@ -29,9 +116,41 @@
         { 
           var msg = evt.data;
           const obj = JSON.parse(msg);
+          console.log(obj,'收到的数据')
+
+          try {
+            if(!obj.message.content){
+            return
+          }  
+          } catch (error) {
+            
+          }
+          
+          // try {
+          //   if(obj.message.type.slice(0,3)=='xp-'){
+          //     console.log('ShouDaoShuJu')
+          //     translates.push(obj)
+          //     if(!playtype){
+          //       playtype=true
+          //       playAnimation();
+          //     }
+          //   return
+          // }
+          // } catch (error) {
+            
+          // }
+          
+
+
           switch (obj.type) {
             case 'displaySubscript':
-              displaySubcript(obj.message);
+              translates.push(obj)
+              if(!playtype){
+                playtype=true
+                playAnimation();
+              }
+
+              // displaySubcript(obj.message);
               break;
             case 'ready':
                 onReady(obj);
@@ -110,6 +229,7 @@
   }
 
   function displaySubcript(message) {
+    return new Promise((resolve)=>{
     switch (message.type) {
       case 'image':
         {
@@ -128,7 +248,8 @@
           container.appendChild(fullscreen);
           setTimeout(() => {
             container.removeChild(fullscreen);
-          }, 10000);
+            resolve()
+          }, playTime);
           break;
         }
       case 'fire':
@@ -147,7 +268,9 @@
           container.appendChild(fullscreen);
           setTimeout(() => {
             container.removeChild(fullscreen);
-          }, 10000);
+            resolve()
+
+          }, playTime);
           break;
         }
       case 'neon-blue-animation':
@@ -164,10 +287,14 @@
           }
           fullscreen.appendChild(text);
           const container = document.getElementById("container");
+          console.log('bofang d neidonr ',container,fullscreen)
+
           container.appendChild(fullscreen);
           setTimeout(() => {
             container.removeChild(fullscreen);
-          }, 10000);
+            resolve()
+
+          }, playTime);
           break;
         }
       case 'neon-blue':
@@ -186,7 +313,9 @@
           container.appendChild(fullscreen);
           setTimeout(() => {
             container.removeChild(fullscreen);
-          }, 10000);
+            resolve()
+
+          }, playTime);
           break;
         }
       case 'bullet':
@@ -199,16 +328,16 @@
           bullet.style.willChange = "transform";
           const container = document.getElementById("container");
           container.appendChild(bullet);
-          setTimeout(() => {
-            bullet.style.transition = `transform ${((container.clientWidth + bullet.clientWidth) / container.clientWidth) * 10}s linear`;
+          bullet.style.transition = `transform ${((container.clientWidth + bullet.clientWidth) / container.clientWidth) * 10}s linear`;
             bullet.style.transform = `translateX(-${container.clientWidth + bullet.clientWidth}px)`;
             bullet.addEventListener('transitionend', () => {
-              container.removeChild(bullet);
+            container.removeChild(bullet);
+            resolve()
+
             });
-          }, 2000);
         }
     }
-    
+  })
   }
 
   function fullscreen() {
@@ -218,6 +347,10 @@
 </script>
 
 <style>
+ @font-face {
+     font-family: digits;
+     src: url('../../assets/ZhanKuKuaiLeTi2016XiuDingBan.ttf');
+    }
 #container {
   position: relative;
   width: 1024px;
@@ -412,5 +545,16 @@
         filter: blur(0rem);
     }
 }
+body{
+  overflow: hidden;
+}
 
+body::-webkit-scrollbar {
+  width: 0;
+}
+ 
+/* 隐藏水平滚动条 */
+body::-webkit-scrollbar {
+  height: 0;
+}
 </style>

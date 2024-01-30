@@ -1,0 +1,36 @@
+/*
+ * The Typekit service used to deliver this font or fonts for use on websites
+ * is provided by Adobe and is subject to these Terms of Use
+ * http://www.adobe.com/products/eulas/tou_typekit. For font license
+ * information, see the list below.
+ *
+ * termina:
+ *   - http://typekit.com/eulas/00000000000000003b9adf1a
+ *   - http://typekit.com/eulas/00000000000000003b9adf28
+ *   - http://typekit.com/eulas/00000000000000003b9adf2a
+ *
+ * © 2009-2022 Adobe Systems Incorporated. All Rights Reserved.
+ */
+/*{"last_published":"2020-02-18 10:28:28 UTC"}*/
+
+@import url("p.css");
+
+@font-face {
+font-family:"termina";
+src:url("../fonts/l.woff2") format("woff2"),url("../fonts/d.woff") format("woff"),url("../fonts/a.woff") format("opentype");
+font-display:auto;font-style:normal;font-weight:400;font-stretch:normal;
+}
+
+@font-face {
+font-family:"termina";
+src:url("../fonts/l1.woff2") format("woff2"),url("../fonts/d1.woff") format("woff"),url("../fonts/a1.woff") format("opentype");
+font-display:auto;font-style:normal;font-weight:700;font-stretch:normal;
+}
+
+@font-face {
+font-family:"termina";
+src:url("../fonts/l2.woff2") format("woff2"),url("../fonts/d2.woff") format("woff"),url("../fonts/a2.woff") format("opentype");
+font-display:auto;font-style:normal;font-weight:900;font-stretch:normal;
+}
+
+.tk-termina { font-family: "termina",sans-serif; }

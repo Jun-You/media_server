@@ -1,6 +1,47 @@
 <template>
-  <h1>正在共享媒体</h1>
   <div>
+    <div class="topListSty">
+      <div @click="dealSubscript=0" :style="dealSubscript==0?'background:#212237;color:#fff':''">
+        <img v-if="dealSubscript==0" src="../../assets/d.png" alt="手动">
+        <img v-else src="../../assets/dd.png" alt="手动">
+        手动处理
+      </div>
+
+      <div @click="dealSubscript=1" :style="dealSubscript==1?'background:#212237;color:#fff':''">
+        <img v-if="dealSubscript==1" src="../../assets/autoto.png" alt="自动">
+        <img v-else src="../../assets/atuo.png" alt="自动">
+
+        自动接受
+      </div>
+      <div @click="dealSubscript=2" :style="dealSubscript==2?'background:#212237;color:#fff':''">
+        <img v-if="dealSubscript==2" src="../../assets/autoto.png" alt="拒绝">
+        <img v-else src="../../assets/atuo.png" alt="拒绝">
+        自动拒绝
+      </div>
+    </div>
+    <div>
+      <div class="listSty"  v-for="(item,index) in subscripts" style="margin-top: 10px;">
+        <div>
+            <img @click="openImg('data:image/jpg;base64,'+item.img)" v-if="item.img!=null" :src="'data:image/jpg;base64,'+item.img" alt="logo" srcset="">
+            {{ item.content||'' }}
+        </div>
+        <div>
+          <img src="../../assets/1.png" alt="√" srcset="" @click="displaySubscript(true,index)">
+
+          <img src="../../assets/xx.png" alt="x" srcset="" @click="displaySubscript(false,index)">
+
+        </div>
+      </div>
+    </div>
+    <div @click="resetContent" class="btnSty">重置展示内容</div>
+  </div>
+  <div class="popup" @click="closeImg()"></div>
+  
+  <!-- <h1>正在共享媒体</h1> -->
+
+
+
+  <!-- <div>
     <button @click="resetContent">重置展示内容</button>
   </div>
   <div>
@@ -21,13 +62,13 @@
       <span v-if="item.type !== 'image'">{{ item.content }}</span>
       <span v-if="item.type === 'image'"><img :src="item.image" class="preview"></span>
     </div>
-  </div>
+  </div> -->
   
 </template>
 
 <script setup>
+// window.port=41647
   import { ref } from 'vue'
-
   const subscripts = ref([]);
   const dealSubscript = ref(0);
   let ws = null;
@@ -65,7 +106,21 @@
           switch (obj.type) {
             case 'subscript' :
               if (dealSubscript.value == 0) {
-                subscripts.value.push(obj.message);
+                try {
+                  if(obj.message.content.split('||').length==2){
+                    obj.message.img=obj.message.content.split('||')[1]
+                    obj.message.content=obj.message.content.split('||')[0]
+
+                    subscripts.value.push(obj.message);
+                  }else{
+                    obj.message.img=null
+                    subscripts.value.push(obj.message); 
+
+                  }
+                } catch (error) {
+                  
+                }
+                
               } else if (dealSubscript.value == 1) {
                 ws.send(JSON.stringify({ type: 'displaySubscript', message: obj.message }))
               }
@@ -110,6 +165,17 @@
     //document.getElementById('localVideo').srcObject = screenStream;
     // const configuration = { iceServers: [{ urls: 'stun:stun.xten.com:3478' }] };
     // const configuration = { iceServers: [{ url: 'stun:[2408:820c:8f7f:3c00:c988:1b1e:1198:80e9]:3478' }] };
+  }
+  function openImg(src){
+    console.log(document.getElementsByClassName("popup"))
+    document.getElementsByClassName("popup")[0].innerHTML=`
+    <div style="width: 100vw;height: 100vh;background: rgb(0, 0, 0);position: fixed; left: 0;top: 0;">
+    <img src="${src}" style="max-height:100vh;max-width:100vw;object-fit: contain;width: 100vw;height: 100vh;" alt="图片" srcset="">
+  </div>
+    `
+  }
+  function closeImg() {
+    document.getElementsByClassName("popup")[0].innerHTML=``
   }
 
   async function onClient(obj) {
@@ -162,13 +228,17 @@
     //alert(obj.candidate.candidate);
   }
 
-  function displaySubscript(flag) {
+  function displaySubscript(flag,index) {
     if (subscripts.value.length === 0) {
       return;
     }
-    const message = subscripts.value[0];
-    subscripts.value = subscripts.value.slice(1, subscripts.value.length);
+    const message = subscripts.value.splice(index,1)[0];
+    // subscripts.value = subscripts.value.slice(1, subscripts.value.length);
     if (flag) {
+      if(message.img!=null){
+        message.content=message.content+'||'+message.img
+      }
+      
       ws.send(JSON.stringify({ type: 'displaySubscript', message: message }))
     }
   }
@@ -178,7 +248,7 @@
   }
 </script>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -186,8 +256,108 @@
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
+.listSty{
+  width: 343px;
+  height: 83px;
+  background: #FFFFFF;
+  border-radius: 12px 12px 12px 12px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  box-sizing: border-box;
+  >div:nth-child(1){
+    width: 70%;
+    font-size: 12px;
+    font-family: Source Han Sans, Source Han Sans;
+    font-weight: 300;
+    color: #404040;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    >img{
+      width: 60px;
+      height: auto;
+    }
+  }
+  >div:nth-child(2){
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 30%;
+    >img{
+      width: 30px;
+      height: auto;
+    }
+  }
 
+}
+.btnSty{
+  width: 343px;
+  height: 50px;
+  background: #212237;
+  border-radius: 8px;
+  font-size: 17px;
+  font-family: PingFang SC, PingFang SC;
+  font-weight: 400;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.btnSty:hover{
+    opacity: .7;
+  }
+.btnSty:active {
+        opacity: .7;
+
+      }
+
+     .btnSty:focus{
+        opacity: .7;
+      }
+body{
+  background: #F7F8FC;
+  width: 100%;
+  height: 100%;
+}
+.topListSty{
+  width: 343px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  >div{
+    width: 103px;
+    height: 58px;
+    background: #FFFFFF;
+    border-radius: 22px 22px 22px 22px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 17px;
+    font-family: PingFang SC, PingFang SC;
+    font-weight: 400;
+    color: #575757;
+    padding: 0 15px;
+    box-sizing: border-box;
+    >img{
+      width: 24px;
+      height: auto;
+    }
+  }
+  >div:hover{
+    opacity: .7;
+  }
+}
 .preview {
   max-height: 400px;
 }
