@@ -32,13 +32,12 @@
   import { ref, watchEffect } from "vue";
   import xpPopup from "./components/xp-popup/xp-popup.vue"
   const SERVER_IP = '2408:820c:8f7f:28c0:20c:29ff:fe94:ca49';
+  const SERVER_PORT = 8080;
   const content = ref(null);
   var isXpPopup=ref(false)
   const html = ref(null);
   const comments = ref(true);
-  const message = ref(null);
-  const type = ref('default');
-  let image = '';
+  let message = null;
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
   let peerConnection = null;
@@ -50,7 +49,7 @@
     if (content.value === null)
       return;
     const response = await fetch(
-      `http://[${SERVER_IP}]/html/${content.value}`
+      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${content.value}`
     );
     html.value = await response.text();
   })
@@ -59,7 +58,7 @@
 
     updateContent = false;
     const response = await fetch(
-      `http://[${SERVER_IP}]/html/${path}`
+      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${path}`
     );
     html.value = await response.text();
   }
@@ -69,7 +68,7 @@
   async function restoreContent() {
     updateContent = true;
     const response = await fetch(
-      `http://[${SERVER_IP}]/html/${previousContent}`
+      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${previousContent}`
     );
     html.value = await response.text();
   }
@@ -81,12 +80,16 @@
     {
         // 打开一个 web socket
         ws = new WebSocket(`ws://[${window.ip}]:${window.port}`);
-      console.log("准备连接web socket")
+        console.log("准备连接web socket")
         ws.onopen = function()
         {
-      console.log("连接成功 socket")
+          console.log("连接成功 socket")
           // Web Socket 已连接上，使用 send() 方法发送数据
           ws.send(JSON.stringify({ type: 'client', media: 'audio'}));
+          if (message !== null) {
+            ws.send(message);
+            message = null;
+          }
         };
         
         ws.onmessage = function (evt) 
@@ -179,19 +182,18 @@
   }
   
   function sendMsg(msg) {
+    if (msg.value === null) {
+      return;
+    }
     console.log(msg.value,msg.modelId)
-    if (msg.value !== null) {
-      ws.send(JSON.stringify({ type: 'subscript', message: {content: msg.value, type:msg.modelId}}))
-
+    message = JSON.stringify({ type: 'subscript', message: {content: msg.value, type:msg.modelId}})
+    if (ws.readyState !== WebSocket.OPEN) {
+      startWebSocket();
+      return;
     }
+    ws.send(message)
+    message = null;
   }
-  function subscript() {
-    if (message.value !== null) {
-      ws.send(JSON.stringify({ type: 'subscript', message: {content: message.value, type: type.value}}))
-      message.value = null;
-    }
-  }
-
 </script>
 
 <style>
