@@ -31,7 +31,7 @@
   // window.port=41647
   import { ref, watchEffect } from "vue";
   import xpPopup from "./components/xp-popup/xp-popup.vue"
-  const SERVER_IP = '2408:820c:8f7f:28c0:20c:29ff:fe94:ca49';
+  const SERVER_IP = '2408:4002:1152:1102:f901:23c5:1a6e:7e31';
   const SERVER_PORT = 8080;
   const content = ref(null);
   var isXpPopup=ref(false)
