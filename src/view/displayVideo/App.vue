@@ -1,6 +1,6 @@
 <template >
   <div id="container">
-    <video id ="localVideo" autoplay controls></video>
+    <video id ="localVideo" autoplay controls muted></video>
     <animation1 :playTime="playTime" ref="animation1Ref" />
   <animation2 :playTime="playTime" ref="animation2Ref" />
   <animation3 :playTime="playTime" ref="animation3Ref" />

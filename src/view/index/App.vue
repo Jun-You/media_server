@@ -31,8 +31,6 @@
   // window.port=41647
   import { ref, watchEffect } from "vue";
   import xpPopup from "./components/xp-popup/xp-popup.vue"
-  const SERVER_IP = '2408:4002:1152:1102:f901:23c5:1a6e:7e31';
-  const SERVER_PORT = 8080;
   const content = ref(null);
   var isXpPopup=ref(false)
   const html = ref(null);
@@ -49,7 +47,7 @@
     if (content.value === null)
       return;
     const response = await fetch(
-      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${content.value}`
+      `https://www.shugan.tech/html/${content.value}`
     );
     html.value = await response.text();
   })
@@ -58,7 +56,7 @@
 
     updateContent = false;
     const response = await fetch(
-      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${path}`
+      `https://www.shugan.tech/html/${path}`
     );
     html.value = await response.text();
   }
@@ -68,7 +66,7 @@
   async function restoreContent() {
     updateContent = true;
     const response = await fetch(
-      `http://[${SERVER_IP}]:${SERVER_PORT}/html/${previousContent}`
+      `https://www.shugan.tech/html/${previousContent}`
     );
     html.value = await response.text();
   }
