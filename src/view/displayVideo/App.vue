@@ -1,4 +1,5 @@
 <template >
+  <button @click="fullscreen">全屏</button>
   <div id="container">
     <video id ="localVideo" autoplay controls muted></video>
     <animation1 :playTime="playTime" ref="animation1Ref" />
@@ -10,9 +11,6 @@
   <meteorpassing :playTime="playTime" ref="meteorpassingRef" />
   <newline :playTime="playTime" ref="newlineRef"/>
   </div>
-
-  <button @click="fullscreen">全屏</button>
-  
 </template>
 
 <script setup> 
