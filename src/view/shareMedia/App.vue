@@ -1,22 +1,22 @@
 <template>
   <div>
     <div class="topListSty">
-      <div @click="dealSubscript=0" :style="dealSubscript==0?'background:#212237;color:#fff':''">
+      <div @click="dealSubscript=0;allowSubscript(true);" :style="dealSubscript==0?'background:#212237;color:#fff':''">
         <img v-if="dealSubscript==0" src="../../assets/d.png" alt="手动">
         <img v-else src="../../assets/dd.png" alt="手动">
         手动处理
       </div>
 
-      <div @click="dealSubscript=1" :style="dealSubscript==1?'background:#212237;color:#fff':''">
+      <div @click="dealSubscript=1;allowSubscript(true);" :style="dealSubscript==1?'background:#212237;color:#fff':''">
         <img v-if="dealSubscript==1" src="../../assets/autoto.png" alt="自动">
         <img v-else src="../../assets/atuo.png" alt="自动">
 
         自动接受
       </div>
-      <div @click="dealSubscript=2" :style="dealSubscript==2?'background:#212237;color:#fff':''">
+      <div @click="dealSubscript=2;allowSubscript(false);" :style="dealSubscript==2?'background:#212237;color:#fff':''">
         <img v-if="dealSubscript==2" src="../../assets/autoto.png" alt="拒绝">
         <img v-else src="../../assets/atuo.png" alt="拒绝">
-        自动拒绝
+        拒绝推送
       </div>
     </div>
     <div>
@@ -81,6 +81,7 @@
     "credential":"great"}]};
   const defaultContent = "default_001"; // the path of default content
   const defaultComments = true;
+  const order = ref(true); //是否允许用户点播url
 
   function startWebSocket()
   {
@@ -96,6 +97,8 @@
           ws.send(JSON.stringify({ type: 'host'}));
           setTimeout(() => {
             ws.send(JSON.stringify({ type: 'defaultContent', content: defaultContent, comments: defaultComments }));
+            allowSubscript(dealSubscript.value === 0 || dealSubscript.value === 1);
+            allowOrder();
           }, 1000);
         };
         
@@ -245,6 +248,14 @@
 
   function resetContent() {
     ws.send(JSON.stringify({ type: 'content', content: 'default' })) //reset default content
+  }
+
+  function allowSubscript(flag) {
+    ws.send(JSON.stringify({ type: 'allowSubscript', flag: flag})) // allow clients to submit subscripts or not
+  }
+
+  function allowOrder() {
+    ws.send(JSON.stringify({ type: 'allowOrder', flag: order.value})) // allow clients to play a url
   }
 </script>
 

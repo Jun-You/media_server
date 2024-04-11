@@ -1,39 +1,55 @@
 <script setup>
   let ws = null;
-  let files;
+  let localFiles;
   let index;
+  const playlist = [];
+
   function play() {
-    const video = document.getElementById('localVideo');
-    const file = files[index];
-    var url = URL.createObjectURL(file);
-    console.log(url);
-    video.src = url;
-    if (ws !== null) {
-      const flags = file.name.split('-');
-      if (flags.length < 4) {
-        ws.send(JSON.stringify({ type: 'content', content: 'default' })) //default content
-      } else {
-        ws.send(JSON.stringify({ type: 'content', content: flags[2], comments: flags[1] === '1'?true:false}))
+    if(playlist.length > 0) {
+      const video = document.getElementById('localVideo');
+      const playUrl = playlist.splice(0,1);
+      video.src = playUrl[0];
+      if (ws !== null) {
+        const filename = playUrl[0].split('/').pop();
+        const flags = filename.split('-');
+        if (flags.length < 2) {
+          ws.send(JSON.stringify({ type: 'content', content: 'default' })) //default content
+        } else {
+          ws.send(JSON.stringify({ type: 'content', content: flags[0], comments: false}))
+        }
+      }
+    } else {
+      const video = document.getElementById('localVideo');
+      const file = localFiles[index];
+      var url = URL.createObjectURL(file);
+      console.log(url);
+      video.src = url;
+      if (ws !== null) {
+        const flags = file.name.split('-');
+        if (flags.length < 4) {
+          ws.send(JSON.stringify({ type: 'content', content: 'default' })) //default content
+        } else {
+          ws.send(JSON.stringify({ type: 'content', content: flags[2], comments: flags[1] === '1'?true:false}))
+        }
+      }
+      index++;
+      if (index === localFiles.length) {
+          index = 0;
       }
     }
   }
+
   function onInputFileChange() {
     const video = document.getElementById('localVideo');
-    const playList = document.getElementById('file');
-    video.onended = playNext;
-    files = playList.files;
-    if (files.length === 0)
+    const locaoPlayList = document.getElementById('file');
+    video.onended = play;
+    localFiles = locaoPlayList.files;
+    if (localFiles.length === 0)
         return;
     index = 0;
     play();
   }
-  function playNext() {
-      index++;
-      if (index === files.length) {
-          index = 0;
-      }
-      play();
-  }
+
   function startWebSocket()
   {
     if ("WebSocket" in window)
@@ -43,8 +59,15 @@
         ws.onopen = function()
         {
           // Web Socket 已连接上，使用 send() 方法发送数据
-          ws.send(JSON.stringify({ type: 'local' }));
+          ws.send(JSON.stringify({ type: 'localPlayer' }));
         };
+        ws.onmessage = (evt) => {
+          var msg = evt.data;
+          const obj = JSON.parse(msg);
+          if (obj.type === 'playUrl'){
+            playlist.push(obj.url);
+          }
+        }
         ws.onclose = function()
         { 
           // 关闭 websocket

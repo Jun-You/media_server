@@ -34,7 +34,10 @@
   const content = ref(null);
   var isXpPopup=ref(false)
   const html = ref(null);
+  const allowSubscriptByHost = ref(true);
+  const allowSubscriptByVideo = ref(true);
   const comments = ref(true);
+  const allowOrder = ref(true);
   let message = null;
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
@@ -50,6 +53,10 @@
       `https://www.shugan.tech/html/${content.value}`
     );
     html.value = await response.text();
+  })
+
+  watchEffect(() => {
+    comments.value = allowSubscriptByHost.value && allowSubscriptByVideo.value;
   })
 
   async function displayPage(path) {
@@ -98,10 +105,17 @@
             case 'content':
                 previousContent = obj.content;
                 //alert(previousContent + "\n" + updateContent.value);
-                comments.value = obj.comments;
+                //comments.value = obj.comments;
+                allowSubscriptByVideo.value = obj.comments;
               if (updateContent) {  // when client is getting detail about the content, stop updatting content
                 content.value = obj.content;
               }
+              break;
+            case 'allowSubscript':
+              allowSubscriptByHost.value = obj.flag;
+              break;
+            case 'allowOrder':
+              allowOrder.value = obj.flag;
               break;
             case 'ready':
                 onReady(obj);
@@ -121,6 +135,8 @@
         { 
           // 关闭 websocket
         };
+      
+      //setTimeout(()=>{ws.send(JSON.stringify({type: 'playUrl', url: 'http://localhost:8080/video/mazida-mazida3.mp4'}))}, 10000);
     }
     else
     {
