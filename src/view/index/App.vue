@@ -36,8 +36,8 @@
   const html = ref(null);
   const allowSubscriptByHost = ref(true);
   const allowSubscriptByVideo = ref(true);
-  const comments = ref(true);
-  const allowOrder = ref(true);
+  const comments = ref(true);  //字幕状态
+  const allowOrder = ref(true); //点播状态
   let message = null;
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
