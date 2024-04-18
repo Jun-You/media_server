@@ -1,5 +1,9 @@
 <template >
-  <button @click="fullscreen">全屏</button>
+  <div>
+    <div @click="fullscreen" class="fullScreenSty">
+      <img :src="fullScreenImg" alt="" srcset="">
+    </div>
+  </div>
   <div id="container">
     <video id ="localVideo" autoplay controls muted></video>
     <animation1 :playTime="playTime" ref="animation1Ref" />
@@ -16,6 +20,7 @@
 <script setup> 
 //window.port=55180
   import { ref ,onMounted} from "vue";
+  import fullScreenImg from "../../assets/c.png"
 
   import animation1 from "./components/xp-animation1/xp-animation1"
   import animation2 from "./components/xp-animation2/xp-animation2.vue"
@@ -124,22 +129,6 @@
             
           }
           
-          // try {
-          //   if(obj.message.type.slice(0,3)=='xp-'){
-          //     console.log('ShouDaoShuJu')
-          //     translates.push(obj)
-          //     if(!playtype){
-          //       playtype=true
-          //       playAnimation();
-          //     }
-          //   return
-          // }
-          // } catch (error) {
-            
-          // }
-          
-
-
           switch (obj.type) {
             case 'displaySubscript':
               translates.push(obj)
@@ -147,8 +136,6 @@
                 playtype=true
                 playAnimation();
               }
-
-              // displaySubcript(obj.message);
               break;
             case 'ready':
                 onReady(obj);
@@ -348,6 +335,18 @@
  @font-face {
      font-family: digits;
      src: url('../../assets/ZhanKuKuaiLeTi2016XiuDingBan.ttf');
+    }
+    .fullScreenSty{
+      width: 70px;
+      height: 70px;
+      border: 2px solid #0ebeff;
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      border-radius: 10px;
+    }
+    .fullScreenSty:active,.fullScreenSty:hover{
+      opacity: .7;
     }
 #container {
   position: relative;
@@ -554,5 +553,8 @@ body::-webkit-scrollbar {
 /* 隐藏水平滚动条 */
 body::-webkit-scrollbar {
   height: 0;
+}
+video::-webkit-media-controls{
+    display:none !important;
 }
 </style>

@@ -1,29 +1,20 @@
 <template>
-  <!-- <div id ="comments" class="item" v-if="comments">
-    <select class="sub-item left" v-model="type" >
-      <option disabled value="default">选择特效：</option>
-      <option value="bullet">弹幕</option>
-      <option value="plain">平面文字</option>
-      <option value="neon-blue">氙光蓝</option>
-      <option value="neon-blue-animation">氙光蓝-动画</option>
-      <option value="fire">火焰</option>
-      <option value="stroke">轮廓</option>
-      <option value="blur">模糊</option>
-      <option value="image">图片</option>
-    </select>
-    <input type="text" v-model="message" id="subscript" class="sub-item left full"/>
-    <input type="file" v-if="type === 'image'" id="choose-image" accept="image/*" class="sub-item left full" :on-change="checkImageCount"/>
-    <button @click="subscript" class="sub-item right">{{ type === 'image'?'发送图片':'发送文字' }}</button>
-  </div> -->
   <div id="content" class="item" v-html="html">
   </div>
   <div v-if="comments" @click="isXpPopup=true" class="sendButton">
-<img src="./send.png" alt="发送" style="width: 30px;height: auto;">
+    <img src="./send.png" alt="发送" style="width: 30px;height: auto;">
+  </div>
+  <div v-if="allowOrder" @click="isAllowOrder=true" class="sendButton" style="bottom: 90px;">
+    <img :src="play" alt="发送" style="width: 30px;height: auto;">
   </div>
   <div style="position: fixed;bottom: 0;left: 0;z-index: 99999999;">
-  <xpPopup @close="isXpPopup=false" v-if="isXpPopup" @change="sendMsg" />
+    <xpPopup @close="isXpPopup=false" v-if="isXpPopup" @change="sendMsg" />
+  </div>
+  <div style="position: fixed;bottom: 0;left: 0;z-index: 99999999;">
+    <dataList v-if="isAllowOrder" @childEvent="childEvent" @cancel="isAllowOrder=false"></dataList>
   </div>
 
+ 
 </template>
 
 <script setup>
@@ -31,13 +22,17 @@
   // window.port=41647
   import { ref, watchEffect } from "vue";
   import xpPopup from "./components/xp-popup/xp-popup.vue"
+  import dataList from "./components/xp-dataList/xp-dataList.vue"
+  import play from "../../assets/play.png"
+
   const content = ref(null);
   var isXpPopup=ref(false)
   const html = ref(null);
-  const allowSubscriptByHost = ref(true);
-  const allowSubscriptByVideo = ref(true);
-  const comments = ref(true);  //字幕状态
-  const allowOrder = ref(true); //点播状态
+  const allowSubscriptByHost = ref(false);
+  const allowSubscriptByVideo = ref(false);
+  let isAllowOrder=ref(false);
+  const comments = ref(false);  //字幕状态
+  const allowOrder = ref(false); //点播状态
   let message = null;
   let updateContent = true;// when client is getting detail about the content, stop updatting content
   let ws = null;
@@ -189,7 +184,11 @@
     const json = JSON.stringify({ type: 'answer', 'answer': answer, id: clientId });
     ws.send(json);
   }
-
+  function childEvent(params) {
+    isAllowOrder.value=false
+    console.log(params)
+    ws.send(JSON.stringify({type: 'playUrl', url:params.url }))
+  }
   function onHostCandidate(obj) {
     peerConnection.addIceCandidate(obj.candidate);
     //alert('host candidate received');

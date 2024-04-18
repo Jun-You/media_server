@@ -2,6 +2,8 @@
   let ws = null;
   let localFiles;
   let index;
+  import updateImg from "../../assets/a49691e65f4ad851e405bc9a1c5ab4c.png"
+  import fullScreenImg from "../../assets/c.png"
   const playlist = [];
 
   function play() {
@@ -12,10 +14,10 @@
       if (ws !== null) {
         const filename = playUrl[0].split('/').pop();
         const flags = filename.split('-');
-        if (flags.length < 2) {
+        if (flags.length < 3) {
           ws.send(JSON.stringify({ type: 'content', content: 'default' })) //default content
         } else {
-          ws.send(JSON.stringify({ type: 'content', content: flags[0], comments: false}))
+          ws.send(JSON.stringify({ type: 'content', content: flags[1], comments: flags[0] === '1'?true:false}))
         }
       }
     } else {
@@ -38,7 +40,9 @@
       }
     }
   }
-
+  function upfile(params) {
+    document.getElementById('file').click()
+  }
   function onInputFileChange() {
     const video = document.getElementById('localVideo');
     const locaoPlayList = document.getElementById('file');
@@ -80,11 +84,36 @@
     }
   }
   window.onload = startWebSocket;
+  
+  function fullscreen() {
+    const video = document.getElementById("localVideo");
+    video.requestFullscreen();
+  }
 </script>
 <template>
   <div class="container">
-      <input type="file" id="file"  @change="onInputFileChange" multiple>
-      <video id="localVideo" autoplay="true" controls></video>
+    <div class="popSty">
+      <!-- <input type="file" id="file"  @change="onInputFileChange" multiple> -->
+     
+    <input type="file" id="file" @change="onInputFileChange" multiple>
+    <div class="file">
+      <div class="file_bt" @click="upfile()">
+        <div>
+          <img :src="updateImg" alt="" srcset="">
+        </div>
+        <div>
+          点击上传
+        </div>
+      </div>
+      
+    </div>
+     
+      <div @click="fullscreen">
+        <img :src="fullScreenImg" alt="" srcset="">
+      </div>
+    </div>
+      
+      <video id="localVideo" autoplay></video>
   </div>
 </template>
 
@@ -97,12 +126,105 @@
   color: #2c3e50;
   margin: 0;
 }
-#file {
-  width: 100%;
-  height: 10%;
-}
+
 #localVideo {
   width: 100%;
   height: 90%;
+}
+video::-webkit-media-controls{
+    display:none !important;
+}
+.popSty{
+  width: 300px;
+  height: 70px;
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  display: flex;
+  justify-content: space-around;
+  background-color: #0099FF;
+  border-radius: 15px;
+  align-items: center;
+}
+.popSty>div:nth-child(3)>img{
+  width: 30px;
+  height: auto;
+}
+.popSty>div:nth-child(3){
+  width: 60px;
+  height: 60px;
+  background-color: #fff;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popSty>div:nth-child(3):hover{
+  opacity: .7;
+}
+/* .popSty>input{
+  width: 200px;
+  height: 50px;
+} */
+input[type="file"]{
+    display: none;
+}
+.filetip{
+    color: #BCBCBC;
+    font-weight: 400;
+    font-size: 16px;
+}
+.filetip.active{
+    display: inline-block;
+}
+.file{
+    display: inline-block;
+    overflow: hidden;
+}
+.file_bt{
+    display: inline-block;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 400;
+    border: 1px solid #fff;
+    width: 200px;
+    height: 60px;
+    border-radius: 15px;
+    letter-spacing: 2px;
+    line-height: normal;
+    background-color: #fff;
+    color: #000;
+    display: flex;
+
+}
+.file_bt>div>img{
+  width: 30px;
+  height: auto;
+}
+.file_bt>div:nth-child(1){
+  width: 70px;
+  height: 70px;
+  line-height: 80px;
+}
+.file_bt>div:nth-child(2){
+  line-height: 60px;
+}
+
+.file_bt:hover{
+  opacity: .7;
+}
+.file p {
+    display: none;
+    overflow: hidden;
+    background-color: rgb(242,242,242);
+    padding: 0 8px;
+    line-height: 25px;
+    border-radius: 1px;
+}
+.file p span:first-child{
+    float: left;
+}
+.file p span:last-child{
+    float: right;
 }
 </style>
