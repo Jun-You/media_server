@@ -91,7 +91,7 @@
     "username":"senseberg",
     "credential":"great"}]};
   const defaultContent = "default_001"; // the path of default content
-  const defaultComments = false;
+  const defaultComments = true; //默认是否允许用户推送
   const order = ref(false); //是否允许用户点播url
 
   function startWebSocket()
@@ -170,7 +170,11 @@
   window.onload = startWebSocket;
   async function startMedia() {
     screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: {
+          frameRate:{ideal:25},
+          width:{ideal:1920},
+          height:{ideal:1080}
+        },
         audio: {
           sampleRate : 44100,
         },
