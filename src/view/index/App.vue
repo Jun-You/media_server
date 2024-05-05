@@ -142,6 +142,7 @@
   window.onload = startWebSocket;
   function onReady(obj) {
     clientId = obj.id;
+    window.mediaId = obj.media_id;
     // const configuration = { iceServers: [{ urls: 'stun:stun.xten.com:3478' }] };
     // const configuration = { iceServers: [{ url: 'stun:[2408:820c:8f7f:3c00:c988:1b1e:1198:80e9]:3478' }] };
     const configuration = {"iceServers":[{
@@ -187,7 +188,13 @@
   function childEvent(params) {
     isAllowOrder.value=false
     console.log(params)
-    ws.send(JSON.stringify({type: 'playUrl', url:params.url }))
+    message = JSON.stringify({type: 'playUrl', url:params.url })
+    if (ws.readyState !== WebSocket.OPEN) {
+      startWebSocket();
+      return;
+    }
+    ws.send(message)
+    message = null;
   }
   function onHostCandidate(obj) {
     peerConnection.addIceCandidate(obj.candidate);
@@ -198,7 +205,7 @@
     if (msg.value === null) {
       return;
     }
-    console.log(msg.value,msg.modelId)
+    //console.log(msg.value,msg.modelId)
     message = JSON.stringify({ type: 'subscript', message: {content: msg.value, type:msg.modelId}})
     if (ws.readyState !== WebSocket.OPEN) {
       startWebSocket();

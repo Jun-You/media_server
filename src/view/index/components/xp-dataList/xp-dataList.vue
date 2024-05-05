@@ -10,7 +10,7 @@
                 </div>
                 <div @click="getPlayList(searchText)">搜索</div>
             </div>
-            <div style="height: 85vh;overflow-y: scroll;">
+            <div style="height: 85vh;overflow-y: scroll;margin-top: 10px;">
                 <div class="listSty" v-for="item in dataList" v-bind:key="item.title">
                 <div>
                     <div>
@@ -32,10 +32,14 @@
                     </div>
                 </div>
             </div>
+            <div style="width: 100%;height: 20vh;"></div>
             </div>
            
 
-            <div class="cancelSty" @click="cancel()">退出</div>
+            <div style="width: 100vw;height: 80px;position: fixed;bottom: 0;left: 0;background-color: #F7F8FC;">
+                <div class="cancelSty" @click="cancel()">退出</div>
+            </div>
+            
         </div>
 
         <div class="popStys" v-if="ispop">
@@ -75,7 +79,7 @@ let dataList = ref([])
 
 async function getPlayList(params='') {
     const response = await fetch(
-      `https://www.shugan.tech/playlist/${encodeURI(params)}`
+      `https://www.shugan.tech/playlist/${window.mediaId}/${encodeURI(params)}`
     );
     dataList.value = await response.json();
 }
@@ -106,10 +110,7 @@ const setAdvertisement=(obj)=>{
     display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
+    margin: 15px auto;
     border-radius: 10px;
 
 }
@@ -140,7 +141,8 @@ const setAdvertisement=(obj)=>{
     width: 100vw;
     height: 100vh;
     background-color: #F7F8FC;
-    padding-top: 40px;
+    padding-top: 5px;
+    box-sizing: border-box;
     user-select: none;
     position: fixed;
     left: 0;

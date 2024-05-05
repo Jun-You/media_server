@@ -90,7 +90,6 @@
     "urls":[`turn:[${window.ip}]:3478`],
     "username":"senseberg",
     "credential":"great"}]};
-  const defaultContent = "default_001"; // the path of default content
   const defaultComments = true; //默认是否允许用户推送
   const order = ref(false); //是否允许用户点播url
 
@@ -107,7 +106,7 @@
           // Web Socket 已连接上，使用 send() 方法发送数据
           ws.send(JSON.stringify({ type: 'host'}));
           setTimeout(() => {
-            ws.send(JSON.stringify({ type: 'defaultContent', content: defaultContent, comments: defaultComments }));
+            ws.send(JSON.stringify({ type: 'defaultContent', comments: defaultComments }));
             allowSubscript(dealSubscript.value === 0 || dealSubscript.value === 1);
             allowOrder();
           }, 1000);
@@ -171,12 +170,13 @@
   async function startMedia() {
     screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
-          frameRate:{ideal:25},
+          frameRate:{ideal:60},
           width:{ideal:1920},
           height:{ideal:1080}
         },
         audio: {
           sampleRate : 44100,
+          
         },
         systemAudio: "include"
     });

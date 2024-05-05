@@ -344,6 +344,7 @@
       bottom: 30px;
       left: 30px;
       border-radius: 10px;
+      z-index: 9;
     }
     .fullScreenSty:active,.fullScreenSty:hover{
       opacity: .7;
