@@ -1,13 +1,21 @@
 <template>
   <div>
-    <div style="display: flex;justify-content: space-between;width: 343px;margin: 0 auto;align-items: center;padding-top: 20px;">
+    <div style="display: flex;justify-content: space-between;width: 343px;margin: 0 auto;align-items: center;padding-top: 10px;">
       <div class="" style="font-size: 28px;">允许点播</div>
       <div>
         <label class="switch">
           <input type="checkbox" v-model="order" @change="allowOrder()">
           <span class="slider round"></span>
         </label>
-
+      </div>
+    </div>
+    <div style="display: flex;justify-content: space-between;width: 343px;margin: 0 auto;align-items: center;padding-top: 10px;">
+      <div class="" style="font-size: 28px;">显示水印</div>
+      <div>
+        <label class="switch">
+          <input type="checkbox" v-model="logo" @change="displayLogo()">
+          <span class="slider round"></span>
+        </label>
       </div>
     </div>
     <div style="width: 343px;margin: 0 auto;font-size: 28px;padding: 10px 0;text-align: left;">推送处理</div>
@@ -92,6 +100,7 @@
     "credential":"great"}]};
   const defaultComments = true; //默认是否允许用户推送
   const order = ref(false); //是否允许用户点播url
+  const logo = ref(true); //是否显示logo
 
   function startWebSocket()
   {
@@ -109,6 +118,7 @@
             ws.send(JSON.stringify({ type: 'defaultContent', comments: defaultComments }));
             allowSubscript(dealSubscript.value === 0 || dealSubscript.value === 1);
             allowOrder();
+            displayLogo();
           }, 1000);
         };
         
@@ -271,6 +281,9 @@
 
   function allowOrder() {
     ws.send(JSON.stringify({ type: 'allowOrder', flag: order.value})) // allow clients to play a url
+  }
+  function displayLogo() {
+    ws.send(JSON.stringify({ type: 'displayLogo', flag: logo.value})) // allow clients to play a url
   }
 </script>
 

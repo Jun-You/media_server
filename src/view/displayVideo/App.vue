@@ -3,9 +3,13 @@
     <div @click="fullscreen" class="fullScreenSty">
       <img :src="fullScreenImg" alt="" srcset="">
     </div>
+    
   </div>
   <div id="container">
     <video id ="localVideo" autoplay controls muted></video>
+    <div v-if="isFullScreen" style="position: fixed;bottom: 30px;left: 100px;z-index: 15;">
+      <label v-if="displayLogo" class="logo" style="color:white;font-size: 4em;">{{ logo }}</label>
+    </div>
     <animation1 :playTime="playTime" ref="animation1Ref" />
   <animation2 :playTime="playTime" ref="animation2Ref" />
   <animation3 :playTime="playTime" ref="animation3Ref" />
@@ -31,11 +35,14 @@
   import meteorpassing from "./components/xp-meteorPassing/xp-meteorpassing.vue"
   import newline from "./components/xp-newline/xp-newline.vue"
 
+  const logo = ref('www.shugan.tech')
+  const displayLogo = ref(true)
   let xpAnimationObj={}
   let ws = null;
   let peerConnection = null;
   let outStream = null;
   let clientId = null;
+  let isFullScreen=ref(false)
   let playTime=1000*30 //单位毫秒
   const animation1Ref=ref(null);//动画1
   xpAnimationObj.draw1=(text) => {
@@ -136,6 +143,9 @@
                 playtype=true
                 playAnimation();
               }
+              break;
+            case 'displayLogo':
+              displayLogo.value = obj.flag;
               break;
             case 'ready':
                 onReady(obj);
@@ -324,8 +334,16 @@
     }
   })
   }
-
+  document.addEventListener('fullscreenchange',()=>{
+    const ele = document.getElementById("container");
+      if(document.fullscreenElement===ele){
+          console.log('dakai')
+      }else{
+       isFullScreen.value=false
+      }
+    })
   function fullscreen() {
+    isFullScreen.value=true
     const ele = document.getElementById("container");
     ele.requestFullscreen();
   }
