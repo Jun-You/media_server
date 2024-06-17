@@ -1,5 +1,5 @@
 <template>
-  <div id="content" class="item" v-html="html">
+  <div id="content" v-html="html">
   </div>
   <div v-if="comments" @click="isXpPopup=true" class="sendButton">
     <img src="./send.png" alt="发送" style="width: 30px;height: auto;">
@@ -217,11 +217,13 @@
 </script>
 
 <style>
-#body {
-  width: 100 vw;
+#top {
+  width: 100%;
+  height: 5vh;
 }
 #localAudio {
-  width: 100%;
+  width: 95%;
+  height: 100%;
 }
 .sendButton{
   width: 50px;
@@ -244,14 +246,18 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 10px;
+  margin-top: 5px;
+}
+#content {
+  width: 100%;
 }
 #comments {
   align-items: baseline;
 }
 .item {
-  width: 100%;
+  width: 98%;
   margin: 0.5em 0;
+  align-self: center;
 }
 .sub-item {
   margin: 0 2px;
